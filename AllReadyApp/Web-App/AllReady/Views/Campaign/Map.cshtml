@@ -1,0 +1,23 @@
+﻿@using AllReady.ViewModels.Campaign
+@model AllReady.ViewModels.Campaign.CampaignViewModel
+@{
+    @addTagHelper "*, Microsoft.AspNetCore.Mvc.TagHelpers"
+}
+
+<div class="row">
+    <div class="col-sm-12">
+        <div id="mapArea" style="position:relative"></div>
+    </div>
+</div>
+@section scripts {
+<script>
+    var modelCampaign = @Json.Serialize(Model);
+
+    $(document).ready(function () {
+        $("#mapArea").css("width", "1000px").css("height", "600px");
+    });
+</script>
+
+    <script src="~/js/mapinteraction.js"></script>
+    <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+}

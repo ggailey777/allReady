@@ -1,0 +1,161 @@
+﻿@using System.Threading.Tasks
+@using AllReady.Security
+@model AllReady.Areas.Admin.ViewModels.Campaign.CampaignDetailViewModel
+
+
+@section styles{
+    <link href="~/css/Admin/Campaign/Details.css" rel="stylesheet" />
+}
+
+@{ ViewBag.Title = Model.Name; }
+<div class="row">
+    <div class="col-12">
+        <ol class="breadcrumb">
+            <li><a asp-controller="Campaign" asp-action="Index" asp-area="Admin">Campaigns</a></li>
+            <li>@Model.Name</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div id="col-main">
+        <div class="col-md-9">
+            <h2 class="inline-form">
+                @if (Model.Featured)
+                {
+                    <i class="fa fa-star star-highlight" aria-hidden="true"></i>
+                }
+                @Model.Name
+            </h2>
+            <a asp-controller="Campaign" asp-action="Edit" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-default inline-form" title="Edit"><i class="fa fa-edit"></i></a>
+            <a asp-controller="Campaign" asp-action="Delete" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-default inline-form" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
+            @if (!Model.Published)
+            {
+                <div class="btn-group btn-group-sm row-btn-margin">
+                    <a data-toggle="tooltip" data-placement="top" title="Publish" asp-controller="Campaign" asp-action="Publish" asp-area="Admin" asp-route-id="@Model.Id" class="btn btn-primary"><span class="fa fa-upload"></span></a>
+                </div>
+            }
+            @if (User.IsUserType(UserType.SiteAdmin))
+            {
+                <form asp-controller="Campaign" asp-area="Admin" asp-action="LockUnlock" class="inline-form">
+                    <input asp-for="Id" type="hidden" />
+                    @if (Model.Locked)
+                    {
+                        <button type="submit" class="btn btn-default inline-form" title="This campaign is currently locked">Unlock</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-default inline-form" title="This campaign is currently unlocked">Lock</button>
+                    }
+                </form>
+            }
+            else if (Model.Locked)
+            {
+                 <span title="This campaign is locked" class="fa fa-exclamation-triangle text-warning"></span><span> This campaign has been locked by a site administrator. Locked campaigns are not visible to the public or to volunteers.</span>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <p class="date-address">
+            <time value="Model.StartDate" format="D"></time> - <time value="Model.EndDate" format="D"></time>
+            <em><time-zone-name class="text-muted" time-zone-id="@Model.TimeZoneId"></time-zone-name></em>
+        </p>
+
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-md-12">
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.PrimaryContactFirstName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.PrimaryContactFirstName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.PrimaryContactLastName)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.PrimaryContactLastName)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.PrimaryContactPhoneNumber)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.PrimaryContactPhoneNumber)
+            </dd>
+            <dt>
+                @Html.DisplayNameFor(model => model.PrimaryContactEmail)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.PrimaryContactEmail)
+            </dd>
+        </dl>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Location)
+            </dt>
+            <dd>
+                @Html.DisplayFor(model => model.Location)
+            </dd>
+        </dl>
+    </div>
+</div>
+<div class="row">
+    <div id="col-main" class="col-md-8">
+        @if (!string.IsNullOrEmpty(Model.ExternalUrl))
+        {
+            <a href="@Model.ExternalUrl" target="_blank">@(string.IsNullOrWhiteSpace(Model.ExternalUrlText) ? Model.ExternalUrl : Model.ExternalUrlText) <i class="fa fa-external-link"></i></a>
+        }
+        <hr />
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <div class="row">
+                <img src="@Model.ImageUrl" class="img-responsive" />
+            </div>
+            <hr />
+        }
+        @Html.Raw(Model.FullDescription)
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3>Goals</h3>
+    </div>
+    <div class="col-md-12">
+        <a asp-controller="Goal" asp-action="Create" asp-area="Admin" asp-route-campaignId="@Model.Id"
+           class="btn btn-default">Create New</a>
+    </div>
+    @foreach (var campaignGoal in Model.CampaignGoals)
+    {
+        <div class="col-md-4">
+            @Html.Partial("_CampaignGoal", campaignGoal)
+        </div>
+    }
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="campaign-sponsor">
+            <strong><a asp-area="" asp-controller="Organization" asp-action="ShowOrganization" asp-route-id="@Model.OrganizationId">@Model.OrganizationName</a></strong>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h3>Events</h3>
+    </div>
+</div>
+@Html.Partial("~/Areas/Admin/Views/Event/_List.cshtml", Model)

@@ -1,0 +1,37 @@
+version: 1.0.0.{build}.{branch}
+
+nuget:
+  account_feed: false
+  
+init:
+ - git config --global core.autocrlf true
+ 
+services:
+  - mssql2014
+
+cache:
+  - AllReadyApp\Web-App\AllReady\node_modules   #node modules for the app
+  - '%APPDATA%\npm-cache'             # npm cache
+  
+install:
+ - cmd: nuget sources add -Name api.nuget.org -Source https://api.nuget.org/v3/index.json
+ - choco install firefox
+ 
+before_build:
+ - cmd: dotnet restore AllReadyApp
+ - nuget restore AllReadyApp\AllReady.IntegrationTest\AllReady.ScenarioTest.fsproj -SolutionDirectory .\AllReadyApp
+ - cmd: npm install gulp bower -g
+
+build_script:
+ - ps: (Get-Content AllReadyApp\Web-App\AllReady\version.json).replace("GITVERSION", (git rev-parse --short HEAD)) | Set-Content AllReadyApp\Web-App\AllReady\version.json
+ - cmd: dotnet build AllReadyApp\AllReady.Core\project.json
+ - cmd: dotnet publish AllReadyApp\Web-App\AllReady\project.json --output c:\Published
+ - cmd: dotnet build AllReadyApp\Web-App\AllReady.UnitTest\project.json
+ - cmd: dotnet build AllReadyApp\AllReady.NotificationsWebJob\project.json
+ - cmd: msbuild AllReadyApp\AllReady.IntegrationTest\AllReady.ScenarioTest.fsproj
+
+test_script:
+ - ps: cd .\AllReadyApp\Web-App\AllReady.UnitTest
+ - cmd: dotnet test 
+
+

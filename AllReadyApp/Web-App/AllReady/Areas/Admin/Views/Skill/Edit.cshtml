@@ -1,0 +1,110 @@
+﻿@using AllReady.Security;
+@using AllReady.Services;
+@model AllReady.Areas.Admin.ViewModels.Skill.SkillEditViewModel
+
+@{
+    var isEdit = Model != null && Model.Id > 0;
+    if (isEdit)
+    {
+        ViewData["Title"] = $"Edit Skill - {Model.Name}";
+        ViewData["Action"] = "Save";
+    }
+    else
+    {
+        ViewData["Title"] = "Create Skill";
+        ViewData["Action"] = "Create";
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@using (Html.BeginForm(null, null, FormMethod.Post, new { @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+
+    <hr />
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        @if (isEdit)
+        {
+            <input asp-for="Id" type="hidden" />
+        }
+        <div class="form-group">
+            <label asp-for="Name" class="control-label col-sm-1"></label>
+            <div class="col-sm-11">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="Description" class="control-label col-sm-1"></label>
+            <div class="col-sm-11">
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label asp-for="ParentSkillId" class="control-label col-sm-1"></label>
+            <div class="col-sm-11">
+                <div class="form-inline">
+                    <select class="form-control" name="ParentSkillId" data-bind="options: availableSkills, optionsText: 'HierarchicalName', optionsValue: 'Id', value: parentSkillId"></select>
+                    <span class="fa fa-question-circle" data-bind="visible: parentSkillDescription, tooltip: { title: parentSkillDescription, placement: 'top' }" aria-hidden="true"></span>
+                    <span class="label label-danger" data-bind="visible: !isValidParent()">A skill can't be its own ancestor!</span>
+                </div>
+            </div>
+        </div>
+        @if (User.IsUserType(UserType.SiteAdmin))
+        {
+            <div class="form-group">
+                <label asp-for="OwningOrganizationName" class="col-sm-1 control-label"></label>
+                <div class="col-sm-11">
+                    <select asp-for="OwningOrganizationId" asp-items="Model.OrganizationSelection.AddNullOptionToFront()" class="form-control"></select>
+                </div>
+            </div>
+        }
+        else
+        {
+            <input asp-for="OwningOrganizationId" type="hidden" />
+        }
+
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-11 ">
+
+                <button type="submit" value="@ViewData["Action"]" class="btn btn-default" data-bind="enable: isValidParent">@ViewData["Action"]</button>
+                <a class="btn btn-default" asp-area="Admin" asp-controller="Skill" asp-action="Index">Back to List</a>
+            </div>
+        </div>
+}
+
+@section scripts {
+    <script type="text/javascript">
+        (function (ko, $, parentSkillId, availableSkills) {
+
+            function AdminSkillViewModel(parentSkillId, availableSkills) {
+                this.parentSkillId = ko.observable(parentSkillId);
+                this.parentSkillDescription = ko.computed(function () {
+                    var self = this;
+                    var skill = availableSkills.filter(function (skill) { return skill.Id === self.parentSkillId(); })[0];
+                    return (skill && skill.Description) || "";
+                }, this);
+                this.availableSkills = ko.observableArray(availableSkills);
+                this.availableSkills.unshift({ HierarchicalName: "<None>", Id: null });
+                this.isValidParent = ko.computed(function () {
+                    var id = @(Model != null ? Model.Id : 0);
+                    var parentId = this.parentSkillId();
+                    var parent = this.availableSkills().filter(function(skill) { return skill.Id === parentId; })[0];
+                    var parentIsValid = true;
+                    while (parentIsValid && parent) {
+                        parentIsValid = parent.Id !== id;
+                        parent = parent.ParentSkill;
+                    }
+                    return parentIsValid;
+                }, this);
+            }
+
+            ko.applyBindings(new AdminSkillViewModel(parentSkillId, availableSkills));
+        })(ko, $,
+            @Json.Serialize(Model?.ParentSkillId ?? null),
+            @Json.Serialize(Model.ParentSelection));
+    </script>
+}
+

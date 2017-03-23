@@ -1,0 +1,80 @@
+@model IEnumerable<AllReady.Areas.Admin.ViewModels.Campaign.IndexViewModel>
+@{ ViewData["Title"] = "Campaigns - Admin"; }
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="btn-group btn-group-sm row-btn-margin">
+            <a data-toggle="tooltip" data-placement="top" id="CreateNew" title="Create New" asp-controller="Campaign" asp-action="Create" asp-area="Admin" class="btn btn-default"><span class="fa fa-plus"></span>&nbsp; Create Campaign</a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-responsive table-condensed">
+            <tr>
+                <th>Actions</th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.OrganizationName)
+                </th>
+                <th>
+                    Dates
+                </th>
+            </tr>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div class="btn-group btn-group-sm row-btn-margin">
+                            <a data-toggle="tooltip" data-placement="top" title="Edit" asp-controller="Campaign" asp-action="Edit" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-success"><span class="fa fa-edit"></span></a>
+                        </div>
+                        @if (!item.Published)
+                        {
+                            <div class="btn-group btn-group-sm row-btn-margin">
+                                <a data-toggle="tooltip" data-placement="top" title="Publish" asp-controller="Campaign" asp-action="Publish" asp-area="Admin" asp-route-id="@item.Id" class="btn btn-primary"><span class="fa fa-upload"></span></a>
+                            </div>
+                        }
+                    </td>
+                    <td>
+                        <a asp-controller="Campaign" asp-action="Details" asp-area="Admin" asp-route-id="@item.Id">@item.Name</a>
+                        @if (item.Featured)
+                        {
+                            <i class="fa fa-star star-highlight" aria-hidden="true"></i>
+                        }
+                        @if (item.Locked)
+                        {
+                            <span title="This campaign is locked" class="fa fa-exclamation-triangle text-warning"></span>
+                        }
+                        @if (!string.IsNullOrEmpty(item.Description))
+                        {
+                            <br /><span class="text-muted">@item.Description</span>
+                        }
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.OrganizationName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.StartDate) - @Html.DisplayFor(modelItem => item.EndDate)
+                    </td>
+                    @* TODO: Delete *@
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip({ container: 'body' });
+        });
+    </script>
+}

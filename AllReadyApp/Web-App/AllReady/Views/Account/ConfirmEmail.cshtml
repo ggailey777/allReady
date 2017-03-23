@@ -1,0 +1,17 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = "Confirm Email";
+}
+
+<h2>@ViewData["Title"].</h2>
+<div>
+    <p>
+        Thank you for confirming your email.
+        @if (!SignInManager.IsSignedIn(User))
+        {
+            <span>Please <a asp-controller="Account" asp-action="Login">Click here to Log in</a>.</span>
+        } 
+    </p>
+</div>
