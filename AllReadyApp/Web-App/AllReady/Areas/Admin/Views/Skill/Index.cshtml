@@ -1,0 +1,68 @@
+﻿@model IEnumerable<AllReady.Areas.Admin.ViewModels.Skill.SkillSummaryViewModel>
+@using AllReady.Security;
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>@ViewData["Title"]</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="btn-group btn-group-sm row-btn-margin">
+            <a data-toggle="tooltip" data-placement="top" title="Create New" asp-area="Admin" asp-controller="Skill" asp-action="Create" class="btn btn-default"><span class="fa fa-plus"></span>&nbsp; Create Skill</a>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-responsive table-condensed">
+            <tr>
+                <th>Action</th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().HierarchicalName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                @if (User.IsUserType(UserType.SiteAdmin))
+                {
+                    <th>
+                        @Html.DisplayNameFor(model => model.First().OwningOrganizationName)
+                    </th>
+                }
+            </tr>
+
+            @foreach (var item in Model.OrderBy(s => s.HierarchicalName))
+            {
+                <tr>
+                    <td>
+                        <div class="btn-toolbar">
+                            <a data-toggle="tooltip" data-placement="top" title="Edit" asp-area="Admin" asp-controller="Skill" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-success"><span class="fa fa-edit"></span></a>
+                            <a data-toggle="tooltip" data-placement="top" title="Delete" asp-area="Admin" asp-controller="Skill" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"><span class="fa fa-remove"></span></a>
+                        </div>
+                    </td>
+                    <td>
+                        @item.HierarchicalName
+                    </td>
+                    <td>
+                        @item.Description
+                    </td>
+                    @if (User.IsUserType(UserType.SiteAdmin))
+                {
+                        <td>
+                            @(item.OwningOrganizationName == null ? "" : item.OwningOrganizationName)
+                        </td>
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip({container:'body'});
+        });
+    </script>
+}

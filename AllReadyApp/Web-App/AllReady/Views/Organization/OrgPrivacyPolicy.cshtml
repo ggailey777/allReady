@@ -1,0 +1,10 @@
+﻿@using AllReady.ViewModels.Organization
+@model AllReady.ViewModels.Organization.OrganizationPrivacyPolicyViewModel
+
+@{
+    ViewData["Title"] = Model.OrganizationName + " Privacy Policy";
+}
+
+<h1>@Model.OrganizationName Privacy Policy</h1>
+
+@Html.Raw(@Model.Content)

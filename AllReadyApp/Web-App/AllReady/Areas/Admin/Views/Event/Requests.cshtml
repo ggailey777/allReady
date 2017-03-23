@@ -1,0 +1,75 @@
+@using System.Threading.Tasks
+
+@model AllReady.Areas.Admin.ViewModels.Event.EventRequestsViewModel
+
+@{
+    ViewBag.Title = @Model.PageTitle;
+}
+
+<div class="row">
+    <div class="col-12">
+        <ol class="breadcrumb">
+            <li><a asp-controller="Campaign" asp-action="Index" asp-route-area="Admin">Campaigns</a></li>
+            <li><a asp-controller="Campaign" asp-action="Details" asp-route-id="@Model.CampaignId" asp-route-area="Admin">@Model.CampaignName</a></li>
+            <li><a asp-controller="Event" asp-action="Details" asp-route-area="Admin" asp-route-id="@Model.EventId">@Model.EventName</a></li>
+            <li>Requests</li>
+        </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <h2>
+            Requests
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="tabbed-nav">
+            <nav>
+                <a asp-action="Requests" asp-route-status="" class="@(@Model.CurrentPage == "All" ? "current" : "")">All Requests</a>
+                <a asp-action="Requests" asp-route-status="Unassigned" class="@(@Model.CurrentPage == "Unassigned" ? "current" : "")">Unassigned Requests</a>
+                <a asp-action="Requests" asp-route-status="Assigned" class="@(@Model.CurrentPage == "Assigned" ? "current" : "")">Assigned Requests</a>
+                <a asp-action="Requests" asp-route-status="PendingConfirmation" class="@(@Model.CurrentPage == "PendingConfirmation" ? "current" : "")">Pending Confirmation Requests</a>
+                <a asp-action="Requests" asp-route-status="Confirmed" class="@(@Model.CurrentPage == "Confirmed" ? "current" : "")">Confirmed Requests</a>
+                <a asp-action="Requests" asp-route-status="Completed" class="@(@Model.CurrentPage == "Completed" ? "current" : "")">Completed Requests</a>
+                <a asp-action="Requests" asp-route-status="Canceled" class="@(@Model.CurrentPage == "Canceled" ? "current" : "")">Canceled Requests</a>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        @if (Model.Requests.Count > 0)
+            {
+            <table class="table">
+                <tr>
+                    <th>Request Name</th>
+                    <th>Address</th>
+                    <th>City</th>
+                    <th>Postcode</th>
+                    <th>Date Added</th>
+                </tr>
+                @foreach (var req in Model.Requests)
+                {
+                    <tr>
+                        <td><a asp-action="Edit" asp-controller="Request" asp-route-id="@req.Id">@req.Name</a></td>
+                        <td>@req.Address</td>
+                        <td>@req.City</td>
+                        <td>@req.PostalCode</td>
+                        <td>@req.DateAdded</td>
+                    </tr>
+                }
+            </table>
+        }
+        else
+        {
+            <br />
+                <p>There are no requests to display</p>
+        }
+
+    </div>
+</div>

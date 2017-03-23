@@ -1,0 +1,328 @@
+@using System.Threading.Tasks
+@model AllReady.Areas.Admin.ViewModels.Event.EventEditViewModel
+@inject AllReady.Services.ISelectListService SelectListService
+
+
+@{
+    //TODO: Need a better way of identifying Create vs Edit. Suggest not binding directly to model class, create view model instead
+    var isEdit = Model.Id != 0;
+    string actionTitle;
+    string cancelUrl;
+    if (isEdit)
+    {
+        ViewBag.Title = $"Edit Event";
+        actionTitle = "Save";
+        cancelUrl = Url.Action("Details", "Event", new { id = Model.Id, area = "Admin" });
+    }
+    else
+    {
+        ViewBag.Title = "Create Event";
+        actionTitle = "Create";
+        cancelUrl = Url.Action("Details", "Campaign", new { id = Model.CampaignId, area = "Admin" });
+    }
+}
+
+@section styles{
+    @if (isEdit)
+    {
+        <link href="~/css/Admin/Event/Edit.css" rel="stylesheet" />
+    }
+}
+
+<div class="row">
+    <div class="col-12">
+        <ol class="breadcrumb">
+            <li><a asp-controller="Campaign" asp-action="Index" asp-area="Admin">Campaigns</a></li>
+            <li><a asp-controller="Campaign" asp-action="Details" asp-route-id="@Model.CampaignId" asp-area="Admin">@Model.CampaignName</a></li>
+            @if (isEdit)
+            {
+                <li><a asp-controller="Event" asp-action="Details" asp-route-id="@Model.Id" asp-area="Admin">@Model.Name</a></li>
+                <li>Edit</li>
+            }
+            else
+            {
+                <li>Create New Event</li>
+            }
+
+        </ol>
+    </div>
+</div>
+
+<h2>@ViewBag.Title</h2>
+
+<form asp-controller="Event" asp-area="Admin" method="post" enctype="multipart/form-data">
+
+    <div class="form-horizontal row">
+        <hr />
+        <div class="form-horizontal col-lg-6 pull-left">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            @if (isEdit)
+            {
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ImageUrl" id="image-url-input" />
+            }
+            <input asp-for="CampaignId" type="hidden" />
+            <input asp-for="CampaignName" type="hidden" />
+            <input asp-for="OrganizationId" type="hidden" />
+            <input asp-for="OrganizationName" type="hidden" />
+            <div class="form-group">
+                <label asp-for="Name" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Description" class="form-control"></input>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Headline" class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <input asp-for="Headline" class="form-control" />
+                    <span asp-validation-for="Headline" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="EventType" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <select asp-for="EventType" asp-items="Html.GetEnumSelectList<EventType>()" class="form-control">
+                        <option value="0">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="EventType" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="IsLimitVolunteers" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="IsLimitVolunteers" type="checkbox" class="form-control" />
+                    <span asp-validation-for="IsLimitVolunteers" class="text-danger"></span>
+                </div>
+            </div>
+
+            <!-- Uncomment this code when wait list functionality is completed -->
+            @*@{
+                    var displaySetting = Model.IsLimitVolunteers ? "" : "style=display:none";
+                }
+                <div id="IsAllowWaitListControl" class="form-group" @displaySetting>
+                    <label asp-for="IsAllowWaitList" class="control-label col-md-2"></label>
+                    <div class="col-md-10">
+                        <input asp-for="IsAllowWaitList" type="checkbox" class="form-control" />
+                        <span asp-validation-for="IsAllowWaitList" class="text-danger"></span>
+                    </div>
+                </div>*@
+            <div class="form-group">
+                <label asp-for="TimeZoneId" class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <select asp-for="TimeZoneId" asp-items="SelectListService.GetTimeZones()" class="form-control"></select>
+                    <span asp-validation-for="TimeZoneId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="StartDateTime" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input type="text" asp-for="StartDateTime" class="form-control datetimepicker start-date-time" autocomplete="off" />
+                    <span asp-validation-for="StartDateTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="EndDateTime" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input type="text" asp-for="EndDateTime" class="form-control datetimepicker end-date-time" autocomplete="off" />
+                    <span asp-validation-for="EndDateTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="RequiredSkills" class="control-label col-md-2" style="padding-top: 0"></label>
+                <div class="col-md-10">
+                    <div data-bind="foreach: requiredSkills">
+                        <div class="form-inline">
+                            <select class="form-control" data-bind="attr: { name: ControlName($index) }, options: $root.availableSkills, optionsText: 'Name', optionsValue: 'Id', value: Id"></select>
+                            <span class="fa fa-question-circle" data-bind="visible: Description, tooltip: { title: Description, placement: 'top' }" aria-hidden="true"></span>
+                            <a href="#" data-bind="click: $root.deleteSkill" title="Delete required skill">
+                                <span class="fa fa-remove" aria-hidden="true"></span>
+                                Delete
+                            </a>
+                        </div>
+                    </div>
+                    <a href="#" data-bind="click: addSkill" title="Add required skill">
+                        <span class="fa fa-plus" aria-hidden="true"></span>
+                        Add
+                    </a>
+                    <span class="label label-danger" data-bind="visible: !requiredSkills.isValid()">@Html.DisplayNameFor(m => m.RequiredSkills) must be unique</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location.Address1" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    @if (Model.EventType == EventType.Rally)
+                    {
+                        <input asp-for="Location.Address1" class="form-control  location-address1" data-val="true" data-val-required="The Address1 field is required." type="text" />
+                        <span asp-validation-for="Location.Address1" class="text-danger"></span>
+                    }
+                    else
+                    {
+                        <input asp-for="Location.Address1" class="form-control" />
+                        <span asp-validation-for="Location.Address1" class="text-danger"></span>
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location.Address2" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Location.Address2" class="form-control" />
+                  <span asp-validation-for="Location.Address2" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location.City" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Location.City" class="form-control" />
+                    <span asp-validation-for="Location.City" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location.State" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Location.State" class="form-control" />
+                    <span asp-validation-for="Location.State" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location.PostalCode" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Location.PostalCode" class="form-control" />
+                    <span asp-validation-for="Location.PostalCode" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Location.Country" class="control-label col-md-2"></label>
+                <div class="col-md-10">
+                    <input asp-for="Location.Country" class="form-control" />
+                    <span asp-validation-for="Location.Country" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 pull-right">
+            <div id="bingMap" style="position: relative"></div>
+        </div>
+
+        <div class="form-horizontal col-lg-6 pull-left">
+            @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
+            {
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-8">
+
+                        <div class="alert event-image-status-alert" style="display:none;">
+
+                        </div>
+
+                        <div class="panel panel-default" id="image-panel-container">
+                            <div class="panel-heading">
+                                <label asp-for="ImageUrl"></label>
+                            </div>
+                            <div class="panel-body" id="image-panel-body">
+                                <div id="image-wrapper">
+                                    <button class="btn btn-danger" id="delete-image">Delete Image</button>
+                                    <img src="@Model.ImageUrl" class="img-responsive center-block" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="form-group">
+                <label asp-for="FileUpload" class="col-md-2 control-label"></label>
+                <div class="col-md-10">
+                    <input type="file" asp-for="FileUpload" class="control-label col-md-4" />
+                    <span asp-validation-for="FileUpload" class="text-danger col-md-12"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <button type="submit" value="@actionTitle" class="btn btn-default submit-form" data-bind="enable: requiredSkills.isValid">@actionTitle</button>
+            <a href="@cancelUrl" class="btn btn-default">Cancel</a>
+        </div>
+    </div>
+</form>
+
+
+@section scripts {
+    @*<script src="~/js/eventmap.js"></script>*@
+    @if (isEdit)
+    {
+        <script src="~/lib/system.js/dist/system.js"></script>
+
+        <script>
+            SystemJS.config({
+                baseURL: '/js/Admin/Event/Edit',
+                defaultJSExtensions: true
+            });
+
+            SystemJS.import('Main');
+        </script>
+    }
+
+    <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+
+
+    <script type="text/javascript">
+        $(".start-date-time")
+            .focusout(function() {
+                var value = $(this).val();
+
+                $(".end-date-time").val(value);
+            });
+
+        (function (ko, $, requiredSkills, availableSkills) {
+
+            function AdminEventViewModel(requiredSkills, availableSkills) {
+
+                function RequiredSkillObservable(skillModel) {
+                    var ret = ko.utils.extend({}, skillModel);
+                    ret.Id = ko.observable(ret.Id);
+                    ret.ControlName = function (index) {
+                        return 'RequiredSkills[' + ko.unwrap(index) + '].SkillId';
+                    };
+                    ret.Description = ko.computed(function () {
+                        var skill = availableSkills.filter(function (skill) { return skill.Id === ret.Id(); })[0];
+                        return (skill && skill.Description) || "";
+                    });
+                    return ret;
+                }
+                requiredSkills = (requiredSkills || []).map(RequiredSkillObservable);
+
+                var self = this;
+                this.requiredSkills = ko.observableArray(requiredSkills).uniqueValidator("Id");
+                this.availableSkills = ko.observableArray(availableSkills);
+                this.addSkill = function() {
+                    self.requiredSkills.push(RequiredSkillObservable());
+                };
+                this.deleteSkill = function(skill) {
+                    self.requiredSkills.remove(skill);
+                };
+            }
+
+            ko.applyBindings(new AdminEventViewModel(requiredSkills, availableSkills));
+
+            $(document).ready(function(){
+                $('#IsLimitVolunteers').click(function() {
+                    $("#IsAllowWaitListControl").toggle(this.checked);
+                });
+            });
+
+        })(ko, $,
+            @Json.Serialize(Model.RequiredSkills.Select(rs => new { Id = rs.SkillId })),
+            @Json.Serialize(SelectListService.GetSkills()));
+    </script>
+}
+
